@@ -113,8 +113,7 @@ export async function verifyWithGPT5(
           content: prompt,
         },
       ],
-      temperature: 0.3, // Lower temperature for more consistent fact-checking
-      max_tokens: 1000,
+      max_completion_tokens: 1000,
       response_format: { type: 'json_object' }, // Ensure JSON response
     });
 
