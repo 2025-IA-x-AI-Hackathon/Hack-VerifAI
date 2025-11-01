@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     // Start verification job
     // Use sequential mode with 1 second delay to simulate real processing
-    startVerificationJob(mockDoc.doc_id, mockDoc.paragraphs, true, 1000);
+    startVerificationJob(mockDoc.doc_id, mockDoc.paragraphs, 1000);
 
     return NextResponse.json({
       success: true,

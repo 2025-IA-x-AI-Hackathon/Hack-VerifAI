@@ -4,15 +4,124 @@ import { PlaceholdersAndVanishInput } from "@/components/ui/placeholders-and-van
 import { GooeyText } from "@/components/ui/gooey-text-morphing";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { ContentAnalyzer } from "@/components/ContentAnalyzer";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnalyzedContent } from "@/types/content";
-import { getMockAnalyzedContent } from "@/utils/mockData";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [analyzedContent, setAnalyzedContent] = useState<AnalyzedContent | null>(null);
   const [inputValue, setInputValue] = useState("");
+  const [docId, setDocId] = useState<string | null>(null);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Polling effect for verification updates
+  useEffect(() => {
+    if (!docId || !analyzedContent) {
+      return;
+    }
+
+    console.log(`[Polling] Starting verification polling for doc ${docId}`);
+
+    // Function to fetch verification results
+    const fetchVerificationResults = async () => {
+      try {
+        const response = await fetch(`/api/verification/${docId}`);
+        if (!response.ok) {
+          console.error('[Polling] Failed to fetch verification results');
+          return;
+        }
+
+        const data = await response.json();
+
+        if (!data.success) {
+          console.error('[Polling] Verification API returned error:', data.error);
+          return;
+        }
+
+        // If no jobs exist, the doc_id might be invalid or server restarted
+        // Stop polling and show error
+        if (data.jobs.length === 0 && data.results.length === 0) {
+          console.warn('[Polling] No jobs found for doc_id. Server may have restarted.');
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+          }
+          return;
+        }
+
+        // Update paragraphs with verification results
+        setAnalyzedContent((prev) => {
+          if (!prev) return prev;
+
+          const updatedParagraphs = prev.paragraphs.map((paragraph) => {
+            // Find matching result
+            const result = data.results.find(
+              (r: { paragraph_id: number; confidence: string; reasoning: string }) => r.paragraph_id === paragraph.id
+            );
+
+            if (result) {
+              // Convert confidence to percentage
+              const confidenceMap = { high: 85, medium: 50, low: 15 };
+
+              return {
+                ...paragraph,
+                confidenceLevel: result.confidence,
+                confidence: confidenceMap[result.confidence as keyof typeof confidenceMap],
+                reasoning: result.reasoning,
+                // Keep existing sources from initial parse
+              };
+            }
+
+            // Check if job failed
+            const job = data.jobs.find((j: { paragraph_id: number; status: string; error?: string }) => j.paragraph_id === paragraph.id);
+            if (job?.status === 'failed') {
+              return {
+                ...paragraph,
+                confidenceLevel: 'low' as const,
+                confidence: 0,
+                reasoning: `검증 실패: ${job.error || '알 수 없는 오류'}`,
+              };
+            }
+
+            return paragraph;
+          });
+
+          return {
+            ...prev,
+            paragraphs: updatedParagraphs,
+          };
+        });
+
+        // Stop polling if all verification is complete
+        if (data.progress.percentComplete === 100) {
+          console.log('[Polling] Verification complete, stopping polling');
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+          }
+        }
+      } catch (error) {
+        console.error('[Polling] Error fetching verification results:', error);
+      }
+    };
+
+    // Initial fetch
+    fetchVerificationResults();
+
+    // Set up polling interval (every 3 seconds)
+    pollingIntervalRef.current = setInterval(fetchVerificationResults, 3000);
+
+    // Cleanup on unmount or when docId/analyzedContent changes
+    return () => {
+      if (pollingIntervalRef.current) {
+        console.log('[Polling] Cleaning up polling interval');
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [docId, analyzedContent?.title]); // Use title as dependency to avoid infinite loop
 
   const placeholders = [
     "논문 URL을 입력하세요...",
@@ -46,11 +155,14 @@ export default function Home() {
           return res.json();
         })
         .then((data) => {
+          // Save doc_id for polling
+          setDocId(data.doc_id);
+
           // 데이터 구조 변환 (백엔드 -> 프론트엔드)
           const transformedContent: AnalyzedContent = {
             title: `분석 결과: ${data.source_url}`,
             sourceUrl: data.source_url,
-            paragraphs: data.paragraphs.map((p: any) => ({
+            paragraphs: data.paragraphs.map((p: { id: number; text: string; links: string[] }) => ({
               id: p.id,
               content: p.text,
               confidenceLevel: "medium", // 초기 상태는 '분석중'

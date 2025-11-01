@@ -60,6 +60,7 @@ export function getMockAnalyzedContent(): AnalyzedContent {
 
   return {
     title: "인공지능의 발전과 미래",
+    sourceUrl: "https://example.com/mock-article",
     paragraphs: paragraphs.map(p => ({
       ...p,
       confidenceLevel: getConfidenceLevel(p.confidence)

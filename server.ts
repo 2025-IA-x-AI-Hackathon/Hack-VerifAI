@@ -117,7 +117,7 @@ app.prepare().then(() => {
 
       // Start verification job in background
       // Use sequential mode with small delay to make updates more visible
-      startVerificationJob(doc_id, paragraphs, true, 1000);
+      startVerificationJob(doc_id, paragraphs, 1000);
 
       // Send acknowledgment
       socket.emit('verification_started', {

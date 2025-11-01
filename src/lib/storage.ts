@@ -104,6 +104,7 @@ class VerificationStorage {
     }
 
     this.results.set(doc_id, results);
+    console.log(`[Storage] Stored result for doc ${doc_id}, paragraph ${result.paragraph_id}. Total results: ${results.length}, Total jobs: ${this.jobs.get(doc_id)?.length || 0}`);
 
     // Update job status
     this.updateJobStatus(doc_id, result.paragraph_id, 'completed');
@@ -287,5 +288,13 @@ class VerificationStorage {
   }
 }
 
-// Export singleton instance
-export const storage = new VerificationStorage();
+// Export singleton instance using globalThis to ensure same instance across HMR
+const globalForStorage = globalThis as unknown as {
+  verificationStorage: VerificationStorage | undefined;
+};
+
+export const storage = globalForStorage.verificationStorage ?? new VerificationStorage();
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForStorage.verificationStorage = storage;
+}
