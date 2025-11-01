@@ -12,16 +12,21 @@ interface ContentAnalyzerProps {
 export function ContentAnalyzer({ content }: ContentAnalyzerProps) {
   const [selectedParagraph, setSelectedParagraph] = useState<ParagraphAnalysis | null>(null);
 
-  const getBackgroundColor = (level: string) => {
-    switch (level) {
+  const getBackgroundColor = (paragraph: ParagraphAnalysis) => {
+    // Don't show colors for unverified paragraphs (initial state)
+    if (paragraph.confidence === 50 && paragraph.reasoning.includes("분석하고 있습니다")) {
+      return "hover:bg-gray-50/50 cursor-pointer transition-colors";
+    }
+
+    switch (paragraph.confidenceLevel) {
       case "high":
-        return "bg-[rgba(220,252,231,0.5)] hover:bg-[rgba(220,252,231,0.7)]";
+        return "bg-[rgba(185,248,207,0.5)] hover:bg-[rgba(185,248,207,0.7)] cursor-pointer transition-colors"; // 초록색
       case "medium":
-        return "bg-transparent hover:bg-gray-50/50";
+        return "bg-[rgba(255,240,133,0.5)] hover:bg-[rgba(255,240,133,0.7)] cursor-pointer transition-colors"; // 노란색
       case "low":
-        return "bg-transparent hover:bg-gray-50/50";
+        return "bg-[rgba(255,201,201,0.5)] hover:bg-[rgba(255,201,201,0.7)] cursor-pointer transition-colors"; // 빨간색
       default:
-        return "bg-transparent";
+        return "hover:bg-gray-50/50 cursor-pointer transition-colors";
     }
   };
 
@@ -40,9 +45,7 @@ export function ContentAnalyzer({ content }: ContentAnalyzerProps) {
             {content.paragraphs.map((paragraph) => (
               <div
                 key={paragraph.id}
-                className={`p-3 rounded cursor-pointer transition-colors ${getBackgroundColor(
-                  paragraph.confidenceLevel
-                )}`}
+                className={`p-3 rounded ${getBackgroundColor(paragraph)}`}
                 onClick={() => setSelectedParagraph(paragraph)}
                 onMouseEnter={() => setSelectedParagraph(paragraph)}
               >
@@ -71,8 +74,10 @@ export function ContentAnalyzer({ content }: ContentAnalyzerProps) {
                   </ReactMarkdown>
                 </div>
 
-                {/* Confidence Indicator */}
-                {selectedParagraph?.id === paragraph.id && (
+                {/* Confidence Indicator - only show "분석 중" if confidence is 50 (initial state) and reasoning contains "분석하고 있습니다" */}
+                {selectedParagraph?.id === paragraph.id &&
+                 paragraph.confidence === 50 &&
+                 paragraph.reasoning.includes("분석하고 있습니다") && (
                   <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
                     <div className="w-4 h-4 border-2 border-gray-300 rounded-full" />
                     <span className="text-[14px] leading-5 -tracking-[0.150391px]">
@@ -139,12 +144,15 @@ export function ContentAnalyzer({ content }: ContentAnalyzerProps) {
               분석 상세
             </h4>
             <div className="space-y-3 text-sm">
-              <div>
-                <p className="text-gray-600 mb-1">신뢰도 점수</p>
-                <p className="text-[16px] font-medium text-[#101828]">
-                  {selectedParagraph.confidence}%
-                </p>
-              </div>
+              {/* Only show confidence score if paragraph is verified */}
+              {!(selectedParagraph.confidence === 50 && selectedParagraph.reasoning.includes("분석하고 있습니다")) && (
+                <div>
+                  <p className="text-gray-600 mb-1">신뢰도 점수</p>
+                  <p className="text-[16px] font-medium text-[#101828]">
+                    {selectedParagraph.confidence}%
+                  </p>
+                </div>
+              )}
               {selectedParagraph.sources.length > 0 && (
                 <div>
                   <p className="text-gray-600 mb-1">출처</p>
