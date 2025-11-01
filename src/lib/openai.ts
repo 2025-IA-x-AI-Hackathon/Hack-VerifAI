@@ -43,46 +43,46 @@ ${content.slice(0, 2000)} ${content.length > 2000 ? '...(truncated)' : ''}
     })
     .join('\n');
 
-  return `You are a fact-checking AI assistant. Your task is to verify the accuracy of a paragraph by comparing it against the cited sources.
+  return `당신은 팩트체크 AI 어시스턴트입니다. 문단의 정확성을 인용된 출처와 비교하여 검증하는 것이 당신의 임무입니다.
 
-## Paragraph to Verify:
+## 검증할 문단:
 "${paragraph_text}"
 
-## Cited Links:
+## 인용된 링크:
 ${paragraph_links.map((link, i) => `${i + 1}. ${link}`).join('\n')}
 
-## Crawled Source Content:
+## 크롤링된 출처 내용:
 ${sourcesText}
 
 ---
 
-## Your Task:
-1. Compare the paragraph's claims against the source content
-2. Evaluate how well the sources support the paragraph
-3. Consider the credibility of each source (academic > official > news > blog > unknown)
-4. Determine a confidence level: high, medium, or low
+## 당신의 작업:
+1. 문단의 주장을 출처 내용과 비교하기
+2. 출처가 문단을 얼마나 잘 뒷받침하는지 평가하기
+3. 각 출처의 신뢰도 고려하기 (학술 > 공식 > 뉴스 > 블로그 > 알 수 없음)
+4. 신뢰도 수준 결정하기: high, medium, 또는 low
 
-### Confidence Criteria:
-- **HIGH**: Multiple credible sources (academic/official/news) strongly support the claims. No contradictions found.
-- **MEDIUM**: Some sources support the claims, but evidence is partial, sources are less credible (blogs), or there are minor inconsistencies.
-- **LOW**: Sources don't support the claims, sources are unavailable/error, sources contradict the claims, or no sources available.
+### 신뢰도 기준:
+- **HIGH**: 여러 신뢰할 수 있는 출처(학술/공식/뉴스)가 주장을 강력하게 뒷받침함. 모순이 발견되지 않음.
+- **MEDIUM**: 일부 출처가 주장을 뒷받침하지만, 증거가 부분적이거나, 출처의 신뢰도가 낮거나(블로그), 사소한 불일치가 있음.
+- **LOW**: 출처가 주장을 뒷받침하지 않거나, 출처를 사용할 수 없거나/오류가 있거나, 출처가 주장과 모순되거나, 출처가 없음.
 
-## Response Format:
-You must respond with a valid JSON object (and ONLY JSON, no markdown):
+## 응답 형식:
+유효한 JSON 객체로만 응답해야 합니다 (마크다운 없이 JSON만):
 {
   "confidence": "high" | "medium" | "low",
-  "summary_of_sources": "Brief summary of how many sources support the claims and their credibility",
-  "reasoning": "Detailed explanation of why you assigned this confidence level, referencing specific sources"
+  "summary_of_sources": "출처가 주장을 얼마나 뒷받침하는지 간략히 요약 (한글로)",
+  "reasoning": "이 신뢰도 수준을 부여한 이유를 구체적인 출처를 참조하여 상세히 설명 (한글로)"
 }
 
-Example:
+예시:
 {
   "confidence": "high",
-  "summary_of_sources": "2/2 sources strongly support the paragraph. Both are official documentation from reputable sources.",
-  "reasoning": "Source 1 (nextjs.org - official) confirms the Turbopack bundler and server components improvements. Source 2 (vercel.com - official) provides detailed information about partial prerendering. Both sources are highly credible official documentation that directly support all claims in the paragraph."
+  "summary_of_sources": "2개의 출처 모두 문단을 강력하게 뒷받침합니다. 두 출처 모두 신뢰할 수 있는 공식 문서입니다.",
+  "reasoning": "출처 1 (nextjs.org - 공식)은 Turbopack 번들러와 서버 컴포넌트 개선사항을 확인해줍니다. 출처 2 (vercel.com - 공식)는 부분 사전 렌더링에 대한 자세한 정보를 제공합니다. 두 출처 모두 문단의 모든 주장을 직접적으로 뒷받침하는 매우 신뢰할 수 있는 공식 문서입니다."
 }
 
-Now, analyze the paragraph and provide your JSON response:`;
+이제 문단을 분석하고 한글로 JSON 응답을 제공하세요:`;
 }
 
 /**
@@ -114,9 +114,9 @@ export async function verifyWithGPT(
       return {
         confidence: 'low',
         summary_of_sources:
-          'OpenAI API key not configured - mock verification result',
+          'OpenAI API 키가 설정되지 않았습니다',
         reasoning:
-          'Cannot perform verification without OpenAI API key. Please configure OPENAI_API_KEY environment variable.',
+          'OpenAI API 키 없이는 검증을 수행할 수 없습니다. OPENAI_API_KEY 환경 변수를 설정해주세요.',
       };
     }
 
@@ -129,7 +129,7 @@ export async function verifyWithGPT(
         {
           role: 'system',
           content:
-            'You are a fact-checking AI that analyzes paragraphs against their cited sources and returns verification results in JSON format.',
+            '당신은 문단을 인용된 출처와 비교하여 분석하고 검증 결과를 JSON 형식으로 반환하는 팩트체크 AI입니다. 모든 응답은 반드시 한글로 작성해야 합니다.',
         },
         {
           role: 'user',
@@ -180,11 +180,11 @@ export async function verifyWithGPT(
     // Return low confidence with error explanation
     return {
       confidence: 'low',
-      summary_of_sources: 'Verification failed due to an error',
+      summary_of_sources: '오류로 인해 검증에 실패했습니다',
       reasoning:
         error instanceof Error
-          ? `Error during verification: ${error.message}`
-          : 'Unknown error occurred during verification',
+          ? `검증 중 오류 발생: ${error.message}`
+          : '검증 중 알 수 없는 오류가 발생했습니다',
     };
   }
 }
@@ -225,9 +225,9 @@ export async function verifyWithRetry(
   // All retries failed
   return {
     confidence: 'low',
-    summary_of_sources: 'Verification failed after multiple attempts',
+    summary_of_sources: '여러 번 시도했지만 검증에 실패했습니다',
     reasoning:
-      lastError?.message || 'Unknown error occurred during verification',
+      lastError?.message || '검증 중 알 수 없는 오류가 발생했습니다',
   };
 }
 

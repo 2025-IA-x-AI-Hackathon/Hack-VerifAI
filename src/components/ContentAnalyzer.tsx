@@ -92,7 +92,7 @@ export function ContentAnalyzer({ content }: ContentAnalyzerProps) {
       </div>
 
       {/* Right Panel */}
-      <div className="w-[384px] flex-shrink-0 space-y-6">
+      <div className="w-[384px] flex-shrink-0 space-y-6 sticky top-6 self-start max-h-[calc(100vh-3rem)] overflow-y-auto overflow-x-hidden">
         {/* Analysis Info */}
         <div className="bg-gray-50 border border-gray-200 rounded-[10px] overflow-hidden">
           <div className="bg-white border-b border-gray-200 p-4">
