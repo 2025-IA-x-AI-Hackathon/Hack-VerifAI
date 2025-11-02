@@ -70,6 +70,7 @@ export default function Home() {
                 confidenceLevel: result.confidence,
                 confidence: confidenceMap[result.confidence as keyof typeof confidenceMap],
                 reasoning: result.reasoning,
+                linkDigests: result.link_digests || [],
                 // Keep existing sources from initial parse
               };
             }
