@@ -15,6 +15,10 @@ export default function Home() {
   const [docId, setDocId] = useState<string | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null);
+
+  // 최소 로딩 화면 표시 시간 (모든 로딩 메시지를 보여주기 위함)
+  const MIN_LOADING_TIME = 20000; // 20초
 
   // Polling effect for verification updates
   useEffect(() => {
@@ -157,6 +161,10 @@ export default function Home() {
       setIsLoading(true);
       setAnalyzedContent(null);
 
+      // 로딩 시작 시간 기록
+      const startTime = Date.now();
+      setLoadingStartTime(startTime);
+
       fetch("/api/ingest", {
         method: "POST",
         headers: {
@@ -190,13 +198,28 @@ export default function Home() {
             })),
           };
           setAnalyzedContent(transformedContent);
+
+          // 파싱 완료 시점에서 남은 로딩 시간 계산
+          const elapsed = Date.now() - startTime;
+          const remaining = MIN_LOADING_TIME - elapsed;
+
+          if (remaining > 0) {
+            // 최소 로딩 시간이 남았으면 남은 시간만큼 대기 후 로딩 종료
+            console.log(`[Loading] Parsing complete in ${elapsed}ms. Waiting ${remaining}ms more to show all loading messages.`);
+            setTimeout(() => {
+              setIsLoading(false);
+            }, remaining);
+          } else {
+            // 최소 로딩 시간이 이미 경과했으면 즉시 종료
+            console.log(`[Loading] Parsing took ${elapsed}ms (>= ${MIN_LOADING_TIME}ms). Ending loading immediately.`);
+            setIsLoading(false);
+          }
         })
         .catch((error) => {
           console.error("Error fetching analysis:", error);
-          // TODO: 사용자에게 에러 메시지 표시
-        })
-        .finally(() => {
+          // 에러 발생 시 즉시 로딩 종료
           setIsLoading(false);
+          // TODO: 사용자에게 에러 메시지 표시
         });
 
       console.log("Submitted URL:", inputValue);
@@ -206,7 +229,8 @@ export default function Home() {
   const loadingMessages = [
     "검증 완료 시 초록색(신뢰도 높음), 빨간색(신뢰도 낮음)으로 표시돼요",
     "주소를 확인 중이에요",
-    "공유하신 링크에서 심층 리서치 결과를 가져오고 있어요"
+    "공유하신 링크에서 심층 리서치 결과를 가져오고 있어요",
+    "검증 완료 시 초록색(신뢰도 높음), 빨간색(신뢰도 낮음)으로 표시돼요"
   ];
 
   return (
