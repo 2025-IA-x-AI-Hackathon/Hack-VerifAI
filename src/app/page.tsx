@@ -139,11 +139,10 @@ export default function Home() {
   };
 
   const placeholders = [
-    "논문 URL을 입력하세요...",
-    "연구 자료의 출처를 확인하세요...",
-    "팩트체크가 필요한 기사 링크를 붙여넣으세요...",
-    "검증하고 싶은 학술 자료 URL을 입력하세요...",
-    "믿을 수 있는 연구인지 확인해보세요...",
+    "AI 리서치 URL을 입력하세요...",
+    "AI 리서치의 출처를 확인하세요...",
+    "검증하고 싶은 자료 URL을 입력하세요...",
+    "믿을 수 있는 출처인지 확인해 보세요...",
   ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -203,8 +202,8 @@ export default function Home() {
   };
 
   const loadingMessages = [
-    "주소를 확인중이에요",
-    "GPT(또는 Gemini) 주소에서 딥리서치 결과를 가져오고 있어요",
+    "주소를 확인 중이에요",
+    "공유하신 링크에서 심층 리서치 결과를 가져오고 있어요",
     "거의 다 왔어요 잠시만요!"
   ];
 
@@ -259,14 +258,14 @@ export default function Home() {
           <header className="border-b border-gray-200">
             <div className="max-w-7xl mx-auto px-6 py-6">
               <h1
-                className="text-[24px] font-medium leading-9 tracking-[0.0703125px] text-[#101828] cursor-pointer hover:text-[#155DFC] transition-colors"
+                className="text-[32px] font-bold leading-10 -tracking-[0.5px] text-[#0A0E14] cursor-pointer hover:text-[#155DFC] transition-colors"
                 onClick={() => {
                   setAnalyzedContent(null);
                   setDocId(null);
                   setInputValue("");
                 }}
               >
-                AI 할루시네이션 검증
+                TruAI
               </h1>
             </div>
           </header>
@@ -361,7 +360,7 @@ export default function Home() {
                     transition={{ delay: 0.6, duration: 0.5 }}
                     className="text-xs sm:text-sm text-muted-foreground/60 dark:text-gray-400"
                   >
-                    연구 논문, 기사, 학술 자료의 URL을 입력하고 Enter를 누르세요
+                    AI 리서치 자료의 URL을 입력하고 Enter를 누르세요
                   </motion.p>
                 </motion.div>
               </AnimatePresence>
