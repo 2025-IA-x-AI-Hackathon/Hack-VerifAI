@@ -58,12 +58,7 @@ export function ContentAnalyzer({ content }: ContentAnalyzerProps) {
     <div className="flex gap-6 max-w-7xl mx-auto px-6">
       {/* Main Document Card */}
       <div className="flex-1 max-w-[816px]">
-        <div className="bg-white border border-gray-200 shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] rounded-[10px] p-12">
-          {/* Title */}
-          <h1 className="text-[28px] font-bold leading-[36px] text-[#0A0E14] mb-10 pb-4 border-b-2 border-gray-300 -tracking-[0.5px]">
-            {content.title}
-          </h1>
-
+        <div className="bg-white border border-gray-200 shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] rounded-[10px] px-12 py-6">
           {/* Paragraphs */}
           <div className="space-y-0">
             {content.paragraphs.map((paragraph) => (
@@ -125,6 +120,19 @@ export function ContentAnalyzer({ content }: ContentAnalyzerProps) {
                 )}
               </div>
             ))}
+          </div>
+
+          {/* Source URL */}
+          <div className="mt-10 pt-6 border-t border-gray-200">
+            <p className="text-[14px] leading-5 text-gray-600 mb-2">원본 출처</p>
+            <a
+              href={content.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[16px] leading-6 text-[#155DFC] hover:underline break-all"
+            >
+              {content.sourceUrl}
+            </a>
           </div>
         </div>
       </div>

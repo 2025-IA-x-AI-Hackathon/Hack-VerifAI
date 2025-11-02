@@ -160,7 +160,7 @@ export default function Home() {
 
           // 데이터 구조 변환 (백엔드 -> 프론트엔드)
           const transformedContent: AnalyzedContent = {
-            title: `분석 결과: ${data.source_url}`,
+            title: data.source_url,
             sourceUrl: data.source_url,
             paragraphs: data.paragraphs.map((p: { id: number; text: string; links: string[]; isHeading?: boolean; headingLevel?: number }) => ({
               id: p.id,
