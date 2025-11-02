@@ -109,8 +109,8 @@ export default function Home() {
     // Initial fetch
     fetchVerificationResults();
 
-    // Set up polling interval (every 3 seconds)
-    pollingIntervalRef.current = setInterval(fetchVerificationResults, 3000);
+    // Set up polling interval (every 5 seconds)
+    pollingIntervalRef.current = setInterval(fetchVerificationResults, 5000);
 
     // Cleanup on unmount or when docId/analyzedContent changes
     return () => {
